@@ -1,0 +1,64 @@
+protected void btnGetUrl_Click(object sender, EventArgs e)
+{
+	GetSiteUrls();
+}
+
+void GetSiteUrls()
+{
+try
+{
+using (var ctx = authMgr.GetSharePointOnlineAuthenticatedContextTenant(siteURL, userName, password))
+{
+ctx.Load(ctx.Web);
+ctx.ExecuteQueryRetry();
+var siteURLCollection = ctx.Site.GetAllWebUrls();
+foreach (var siteUrls in siteURLCollection)
+{
+lblSiteUrls.Text += siteUrls +"<br/>";
+}
+ctx.ExecuteQueryRetry();
+}
+}
+catch (Exception ex)
+{
+//lblSiteUrls.Text = ex.StackTrace;
+lblSiteUrls.Text = "Problem in getting Site Urls";
+}
+}
+//////////
+
+protected void btnCreateListWithFields_Click(object sender, EventArgs e)
+        {
+            CreateListWithFields();
+        }
+void CreateListWithFields()
+ {
+ try
+ {
+using (var ctx = authMgr.GetSharePointOnlineAuthenticatedContextTenant(siteURL, userName, password))
+{                                  
+if (ctx.Web.ListExists("DemoList"))
+ctx.Web.GetListByTitle("DemoList").DeleteObject();
+ctx.ExecuteQueryRetry();
+List demoList = ListExtensions.CreateList(ctx.Web, ListTemplateType.GenericList, "DemoList", false, false);
+FieldCreationInformation fldTestID = new FieldCreationInformation(FieldType.Number);
+fldTestID.DisplayName = "Test ID";
+fldTestID.InternalName = "TestID";
+fldTestID.AddToDefaultView = true;
+fldTestID.Id = Guid.NewGuid();
+demoList.CreateField(fldTestID);
+FieldCreationInformation fldTestName = new FieldCreationInformation(FieldType.Text);
+fldTestName.DisplayName = "Test Name";
+fldTestName.InternalName = "TestName";
+fldTestName.AddToDefaultView = true;
+fldTestName.Id = Guid.NewGuid();
+demoList.CreateField(fldTestName);
+demoList.Update();
+ctx.ExecuteQueryRetry();
+lblCreateListWithFields.Text = "Custom List with Fields Created Successfully";
+ }
+ }
+catch (Exception ex)
+ {
+ }
+ }
